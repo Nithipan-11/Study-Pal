@@ -4,6 +4,8 @@ An Arduino + webcam project that detects your focus level and responds with hard
 
 ## Hardware
 
+![Wiring diagram](wiring-diagram.svg)
+
 | Component | Arduino Pin | Notes |
 |---|---|---|
 | Green LED | D8 | via 220Ω resistor — focused indicator |
