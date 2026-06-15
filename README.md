@@ -1,39 +1,59 @@
 # Study Pal
 
-A webcam-based study monitor that uses computer vision to track focus and alert you when you're distracted. Sends real-time mode signals to an Arduino over serial.
+An Arduino + webcam project that detects your focus level and responds with hardware feedback.
 
-## How it works
+## Hardware
 
-- **Face detection** (OpenCV Haar cascade) — determines whether you're at your desk
-- **Phone detection** (YOLOv8) — flags phone use immediately
-- **Mode signals** sent to Arduino: `FOCUS`, `AWAY`, `BREAK`, `PHONE`
+| Component | Arduino Pin | Notes |
+|---|---|---|
+| Green LED | D8 | via 220Ω resistor — focused indicator |
+| Red LED | D9 | via 220Ω resistor — distracted indicator |
+| Buzzer | D10 | audio alerts |
+| DC motor fan | D6 | via NPN transistor (1kΩ on base), powered from 5V rail |
+| OLED display | A4 (SDA), A5 (SCK) | 1.3" SH1106, I2C address 0x3C, U8g2 library |
 
-## Modes
+**Other parts:** Arduino Uno, breadboard, jumper wires, 220Ω resistors (x2 for LEDs), 1kΩ resistor (transistor base), NPN transistor (e.g. 2N2222), DC motor + fan blade.
 
-| Mode | Trigger |
-|------|---------|
-| FOCUS | Face detected, no phone |
-| AWAY | No face detected |
-| BREAK | Manually toggled with `b` key |
-| PHONE | Phone detected (overrides all) |
+**Wiring notes:**
+- Common ground — all GND legs/pins connect to the same blue rail, which connects to Arduino GND
+- LED long leg = positive (anode) → toward resistor/Arduino pin; short leg = negative (cathode) → GND
+- Transistor (flat side facing you): left = Emitter → GND, middle = Base → 1kΩ → D6, right = Collector → motor
+- OLED only needs 4 wires (VCC, GND, SDA, SCK) — no potentiometer required
 
-## Requirements
+## Software
 
-- Python 3.8+
-- Arduino connected on `COM3` at 9600 baud
-- Webcam
+- **StudyPal.ino** — Arduino sketch. Reads serial commands (FOCUS, PHONE, AWAY, BREAK) and controls LEDs, buzzer, fan, and OLED.
+- **study_pal.py** — Python script using OpenCV for face/head position detection and YOLOv8 for phone detection. Sends serial commands to Arduino.
 
-Install dependencies:
+## Setup
 
+### Arduino
+1. Install the **U8g2** library via Library Manager
+2. Upload `StudyPal.ino`
+
+### Python
 ```
-pip install opencv-python ultralytics pyserial
+pip install opencv-python pyserial ultralytics
 ```
 
-## Usage
+Edit `SERIAL_PORT` in `study_pal.py` to match your Arduino's COM port.
 
+### Run
 ```
 python study_pal.py
 ```
 
-- `b` — toggle break mode
-- `q` — quit
+Press **B** for break mode, **Q** to quit.
+
+## Modes
+
+| Mode | Green LED | Red LED | Fan | Buzzer | OLED |
+|---|---|---|---|---|---|
+| FOCUS | ON | OFF | OFF | OFF | "Focus Mode" |
+| PHONE | ON | ON | ON | 3 beeps | "Phone Detected" |
+| AWAY | OFF | ON (blinks then stays) | ON | Continuous | "Come Back!" |
+| BREAK | ON | OFF | OFF | 2 beeps | "Break Time!" |
+
+## How it works
+
+OpenCV's Haar cascade detects your face each frame. If your face is centered in the webcam view, the system counts you as focused (FOCUS). If your face moves off-center or disappears for a few seconds, it switches to AWAY. YOLOv8 runs in parallel to detect a phone in frame — if found, PHONE mode triggers regardless of face position. Pressing B manually triggers BREAK, which cancels automatically once your face returns to center.
