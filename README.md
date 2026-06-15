@@ -9,10 +9,9 @@ An Arduino + webcam project that detects your focus level and responds with hard
 | Green LED | D8 | via 220Ω resistor — focused indicator |
 | Red LED | D9 | via 220Ω resistor — distracted indicator |
 | Buzzer | D10 | audio alerts |
-| DC motor fan | D6 | via NPN transistor (1kΩ on base), powered from 5V rail |
 | OLED display | A4 (SDA), A5 (SCK) | 1.3" SH1106, I2C address 0x3C, U8g2 library |
 
-**Other parts:** Arduino Uno, breadboard, jumper wires, 220Ω resistors (x2 for LEDs), 1kΩ resistor (transistor base), NPN transistor (e.g. 2N2222), DC motor + fan blade.
+**Other parts:** Arduino Uno, breadboard, jumper wires, 220Ω resistors (x2 for LEDs).
 
 **Wiring notes:**
 - Common ground — all GND legs/pins connect to the same blue rail, which connects to Arduino GND
@@ -22,7 +21,7 @@ An Arduino + webcam project that detects your focus level and responds with hard
 
 ## Software
 
-- **StudyPal.ino** — Arduino sketch. Reads serial commands (FOCUS, PHONE, AWAY, BREAK) and controls LEDs, buzzer, fan, and OLED.
+- **StudyPal.ino** — Arduino sketch. Reads serial commands (FOCUS, PHONE, AWAY, BREAK) and controls LEDs, buzzer and OLED.
 - **study_pal.py** — Python script using OpenCV for face/head position detection and YOLOv8 for phone detection. Sends serial commands to Arduino.
 
 ## Setup
@@ -47,7 +46,7 @@ Press **B** for break mode, **Q** to quit.
 
 ## Modes
 
-| Mode | Green LED | Red LED | Fan | Buzzer | OLED |
+| Mode | Green LED | Red LED | Buzzer | OLED |
 |---|---|---|---|---|---|
 | FOCUS | ON | OFF | OFF | OFF | "Focus Mode" |
 | PHONE | ON | ON | ON | 3 beeps | "Phone Detected" |
